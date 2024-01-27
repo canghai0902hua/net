@@ -1,8 +1,10 @@
+//plugins {
+//    id 'com.android.library'
+//    id 'maven-publish'      //配置maven-publish的maven插件id,表示上传至公开的maven库
+//}
+apply plugin: 'maven-publish'
+apply plugin: 'com.android.library'
 
-plugins {
-    id 'com.android.library'
-    id 'maven-publish'      //配置maven-publish的maven插件id,表示上传至公开的maven库
-}
 //打包源码的task
 tasks.register('generateSourcesJar', Jar) {
     from android.sourceSets.main.java.srcDirs
