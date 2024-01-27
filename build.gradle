@@ -1,0 +1,102 @@
+
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'      //配置maven-publish的maven插件id,表示上传至公开的maven库
+}
+//打包源码的task
+tasks.register('generateSourcesJar', Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier 'sources'
+}
+
+//依赖项配置缓存无效
+configurations.configureEach {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+}
+
+//配置上传的publishing,与android配置目录同级
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            group = 'com.github.netlib'
+            version = '1.0.0'
+            //发布release版本
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+                //groupId通常是自己的gitee或者GitHub的账户地址
+                groupId = group
+                //artifactId通常是指待发布项目的名称，也就是别名
+                artifactId = 'netlib'
+                //version通常是指待发布项目的版本号，这里是写死的，通常我们取项目versionName
+                version = version
+            }
+            //发布debug版本
+            debug(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.debug
+                groupId = group
+                artifactId = 'netlib-debug'
+                version = version
+            }
+        }
+    }
+}
+android {
+    namespace 'com.yihuosoft.netlib'
+    compileSdk 33
+
+    defaultConfig {
+        minSdk 28
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+    //配置上传的publishing几种版本
+    publishing {
+        singleVariant("release")
+        singleVariant("debug")
+    }
+    buildTypes {
+        debug {
+            minifyEnabled false
+            buildConfigField("String", "HOST", '"http://api.local.com"')
+            buildConfigField("String", "API_KEY", '"swWkZgMzeOQgovuUsVaM13wX"')
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+
+
+
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    // OkHttp 框架：https://github.com/square/okhttp
+    api 'com.squareup.okhttp3:okhttp:4.10.0'
+    implementation 'com.squareup.okio:okio:3.0.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+
+    implementation group: "aGroup", name: "netlib", version: "1.0", changing: true
+
+
+}
+
